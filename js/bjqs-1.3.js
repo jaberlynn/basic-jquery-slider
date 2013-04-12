@@ -28,12 +28,13 @@
 
             // transition valuess
             animtype        : 'fade',
-            animduration    : 450,      // length of transition
-            animspeed       : 4000,     // delay between transitions
+            animduration    : 300,      // length of transition
+            animspeed       : 3000,     // delay between transitions
             automatic       : true,     // enable/disable automatic slide rotation
+            vertical        : true,		// allow to choose whether the slide should be horizontal or vertical
 
             // control and marker configuration
-            showcontrols    : true,     // enable/disable next + previous UI elements
+            showcontrols    : false,     // enable/disable next + previous UI elements
             centercontrols  : true,     // vertically center controls
             nexttext        : 'Next',   // text/html inside next UI element
             prevtext        : 'Prev',   // text/html inside previous UI element
@@ -174,9 +175,9 @@
 
         var conf_responsive = function() {
 
-            responsive.width    = $wrapper.outerWidth();
-            responsive.ratio    = responsive.width/settings.width,
-            responsive.height   = settings.height * responsive.ratio;
+            responsive.width      = $wrapper.outerWidth(),
+            responsive.ratio     = responsive.width/settings.width,
+            responsive.height    = settings.height * responsive.ratio;
 
             if(settings.animtype === 'fade'){
 
@@ -198,28 +199,27 @@
                     'max-width'     : settings.width,
                     'position'      : 'relative'
                 });
+                
 
                 if(responsive.width < settings.width){
-
                     $slides.css({
-                        'height'        : responsive.height
+                        'height' : responsive.height
                     });
                     $slides.children('img').css({
-                        'height'        : responsive.height
+                        'height' : responsive.height
                     });
                     $slider.css({
-                        'height'        : responsive.height
+                        'height' : responsive.height
                     });
                     $wrapper.css({
-                        'height'        : responsive.height
+                        'height' : responsive.height
                     });
-
                 }
 
                 $(window).resize(function() {
 
                     // calculate and update dimensions
-                    responsive.width    = $wrapper.outerWidth();
+                    responsive.width    = $wrapper.outerWidth(),
                     responsive.ratio    = responsive.width/settings.width,
                     responsive.height   = settings.height * responsive.ratio;
 
@@ -251,10 +251,19 @@
                     'height'        : settings.height,
                     'width'         : settings.width
                 });
-                $slider.css({
-                    'height'        : settings.height,
-                    'width'         : settings.width * settings.slidecount
-                });
+                
+                if (!settings.vertical) {
+                    $slider.css({
+                        'height'     : settings.height,
+                        'width'      : settings.width * settings.slidecount
+                    });
+                } else {
+                    $slider.css({
+                        'height'     : settings.height * settings.slidecount,
+                        'width'      : settings.width
+                    });
+                }
+                
                 $wrapper.css({
                     'height'        : settings.height,
                     'max-width'     : settings.width,
@@ -262,28 +271,27 @@
                 });
 
                 if(responsive.width < settings.width){
-
-                    $slides.css({
-                        'height'        : responsive.height
-                    });
+                     $slides.css({
+                         'height' : responsive.height
+                     });
                     $slides.children('img').css({
-                        'height'        : responsive.height
+                        'height' : responsive.height
                     });
                     $slider.css({
-                        'height'        : responsive.height
+                        'height' : responsive.height
                     });
                     $wrapper.css({
-                        'height'        : responsive.height
+                        'height' : responsive.height
                     });
-
                 }
+
 
                 $(window).resize(function() {
 
                     // calculate and update dimensions
-                    responsive.width    = $wrapper.outerWidth(),
-                    responsive.ratio    = responsive.width/settings.width,
-                    responsive.height   = settings.height * responsive.ratio;
+                    responsive.width     = $wrapper.outerWidth(),
+                    responsive.ratio     = responsive.width/settings.width,
+                    responsive.height    = settings.height * responsive.ratio;
 
                     $slides.css({
                         'height'        : responsive.height,
@@ -293,10 +301,19 @@
                         'height'        : responsive.height,
                         'width'         : responsive.width
                     });
-                    $slider.css({
-                        'height'        : responsive.height,
-                        'width'         : responsive.width * settings.slidecount
-                    });
+                                        
+                    if (!settings.vertical) {
+                        $slider.css({
+                            'height'     : responsive.height,
+                            'width'      : responsive.width * settings.slidecount
+                        });
+                    } else {
+                       $slider.css({
+                           'height'     : responsive.height * settings.slidecount,
+                           'width'      : responsive.width
+                       });
+                    }
+                    
                     $wrapper.css({
                         'height'        : responsive.height
                     });
@@ -368,7 +385,7 @@
             $canvas = $('<div class="bjqs-wrapper"></div>');
 
             // if the slider is responsive && the calculated width is less than the max width
-            if(settings.responsive && (responsive.width < settings.width)){
+            if(settings.responsive && (responsive.width < settings.width) && !settings.vertical){
 
                 $canvas.css({
                     'width'     : responsive.width,
@@ -383,8 +400,22 @@
                     'left'      : -responsive.width * state.currentslide
                 });
 
-            }
-            else {
+            } else if(settings.responsive && (responsive.height < settings.height) && settings.vertical){
+
+                $canvas.css({
+                    'width'     : responsive.width,
+                    'height'    : responsive.height,
+                    'overflow'  : 'hidden',
+                    'position'  : 'relative'
+                });
+
+                // update the dimensions to the slider to accomodate all the slides side by side
+                $slider.css({
+                    'height'    : responsive.height * (state.slidecount + 2),
+                    'top'           : -responsive.height * state.currentslide
+                });
+
+            } else {
 
                 $canvas.css({
                     'width'     : settings.width,
@@ -394,19 +425,33 @@
                 });
 
                 // update the dimensions to the slider to accomodate all the slides side by side
-                $slider.css({
-                    'width'     : settings.width * (state.slidecount + 2),
-                    'left'      : -settings.width * state.currentslide
-                });
+                if (!settings.vertical) {
+                    $slider.css({
+                        'width' : settings.width * (state.slidecount + 2),
+                        'left'  : -settings.width * state.currentslide
+                    });
+                } else {
+                    $slider.css({
+                        'height'    : settings.height * (state.slidecount + 2),
+                        'top'       : -settings.height * state.currentslide
+                    });
+                }
 
             }
 
             // add some inline styles which will align our slides for left-right sliding
-            $slides.css({
-                'float'         : 'left',
-                'position'      : 'relative',
-                'display'       : 'list-item'
-            });
+            if (!settings.vertical) {
+                $slides.css({
+                    'float'      : 'left',
+                    'position'   : 'relative',
+                    'display'    : 'list-item'
+                });
+            } else {
+                $slides.css({
+                    'position'       : 'relative',
+                    'display'        : 'list-item'
+                });
+            }
 
             // 'everything.. in it's right place'
             $canvas.prependTo($wrapper);
@@ -671,39 +716,73 @@
                     }
 
                     // if the slider is responsive && the calculated width is less than the max width
-                    if(settings.responsive && ( responsive.width < settings.width ) ){
+                    if(settings.responsive && ( responsive.width < settings.width ) && !settings.vertical ){
                         state.slidewidth = responsive.width;
-                    }
-                    else{
-                        state.slidewidth = settings.width;
-                    }
-
-                    $slider.animate({'left': -state.nextindex * state.slidewidth }, settings.animduration, function(){
-
-                        state.currentslide = state.nextslide;
-                        state.currentindex = state.nextindex;
-
-                        // is the current slide a clone?
-                        if($slides.eq(state.currentindex).attr('data-clone') === 'last'){
-
-                            // affirmative, at the last slide (clone of first)
-                            $slider.css({'left': -state.slidewidth });
-                            state.currentslide = 2;
-                            state.currentindex = 1;
-
+                    } else if(settings.responsive && ( responsive.height < settings.height ) && settings.vertical ){
+                        state.slideheight = responsive.height;
+                    } else{
+                        if (!settings.vertical) {
+                            state.slidewidth = settings.width;
+                         } else {
+                            state.slideheight = settings.height;
                         }
-                        else if($slides.eq(state.currentindex).attr('data-clone') === 'first'){
+                    }
 
-                            // affirmative, at the fist slide (clone of last)
-                            $slider.css({'left': -state.slidewidth *(state.slidecount - 2)});
-                            state.currentslide = state.slidecount - 1;
-                            state.currentindex = state.slidecount - 2;
+                    if (!settings.vertical) {
+                        $slider.animate({'left': -state.nextindex * state.slidewidth }, settings.animduration, function(){
 
-                        }
+                             state.currentslide = state.nextslide;
+                             state.currentindex = state.nextindex;
+    
+                             // is the current slide a clone?
+                             if($slides.eq(state.currentindex).attr('data-clone') === 'last'){
+    
+                                 // affirmative, at the last slide (clone of first)
+                                 $slider.css({'left': -state.slidewidth });
+                                 state.currentslide = 2;
+                                 state.currentindex = 1;
+    
+                             }
+                             else if($slides.eq(state.currentindex).attr('data-clone') === 'first'){
+    
+                                 // affirmative, at the fist slide (clone of last)
+                                 $slider.css({'left': -state.slidewidth *(state.slidecount - 2)});
+                                 state.currentslide = state.slidecount - 1;
+                                 state.currentindex = state.slidecount - 2;
+    
+                             }
+    
+                             state.animating = false;
 
-                        state.animating = false;
+                        });
+                    } else {
+                        $slider.animate({'top': -state.nextindex * state.slideheight }, settings.animduration, function(){
 
-                    });
+                             state.currentslide = state.nextslide;
+                             state.currentindex = state.nextindex;
+    
+                             // is the current slide a clone?
+                             if($slides.eq(state.currentindex).attr('data-clone') === 'last'){
+    
+                                 // affirmative, at the last slide (clone of first)
+                                 $slider.css({'top': -state.slideheight });
+                                 state.currentslide = 2;
+                                 state.currentindex = 1;
+    
+                             }
+                             else if($slides.eq(state.currentindex).attr('data-clone') === 'first'){
+    
+                                 // affirmative, at the fist slide (clone of last)
+                                 $slider.css({'top': -state.slideheight *(state.slidecount - 2)});
+                                 state.currentslide = state.slidecount - 1;
+                                 state.currentindex = state.slidecount - 2;
+    
+                             }
+    
+                             state.animating = false;
+
+                        });
+                    }
 
                 }
 
